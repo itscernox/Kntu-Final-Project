@@ -8,8 +8,6 @@ struct  CELL_INFO{
     int int_set;
     double float_num;
     int float_set;
-    char str[100];
-    int str_set;
 
     /*
         status show what kind of data does the sell have stored
@@ -17,7 +15,6 @@ struct  CELL_INFO{
         1 : int 
         2 : float 
         3 : double 
-        4 : string
     */
    
     int status[1];
@@ -60,7 +57,6 @@ int main(){
             index = r * cols + c;
             cells[index].int_set = 0;
             cells[index].float_set = 0;
-            cells[index].str_set = 0;
             cells[index].status[0] = 0;
         }
     }
