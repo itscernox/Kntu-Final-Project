@@ -13,7 +13,6 @@ typedef struct{
 
     /*
         status show what kind of data does the sell have stored
-        0 : None
         1 : int 
         2 : float 
     */
