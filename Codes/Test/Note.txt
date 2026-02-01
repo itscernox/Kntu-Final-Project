@@ -1,0 +1,5 @@
+You can run & debug whole project using file (test.c)
+
+Enjoy :)
+
+- Mahyar Mousavi
