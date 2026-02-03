@@ -18,8 +18,8 @@ int new_sheet(CELL_INFO **cells , int *rows , int *cols , FILE **f){
 
     identify_cells(*cells , *rows , *cols);
 
-    // Build Binary File (db)
-    *f = fopen("/Users/cernox/Desktop/db" , "wb");
+    // Build Binary File (database)
+    *f = fopen("database" , "wb");
     fwrite(&rows , sizeof(int) , 1 , *f);
     fwrite(&cols , sizeof(int) , 1 , *f);
 
@@ -38,18 +38,18 @@ int new_sheet(CELL_INFO **cells , int *rows , int *cols , FILE **f){
     }
 
     fclose(*f);
-    *f = fopen("/Users/cernox/Desktop/db" , "rb+");
+    *f = fopen("database" , "rb+");
 
     delay_seconds(1);
-    printf("New spreed sheet created. Binary File Name : db\n\n");
+    printf("New spreed sheet created. Binary File Name : database\n\n");
     delay_seconds(1);
 
     return 1;
 }
 
 int load_binary(char *filename , CELL_INFO **cells , int *rows , int *cols , FILE **f){
-    //*f = fopen(filename , "rb");
-    *f = fopen("/Users/cernox/Desktop/db" , "rb");
+    *f = fopen(filename , "rb");
+    //*f = fopen("/Users/cernox/Desktop/database" , "rb");
 
     delay_seconds(1);
     printf("\nLoading spreadsheet...\n");
@@ -77,7 +77,8 @@ int load_binary(char *filename , CELL_INFO **cells , int *rows , int *cols , FIL
         }
 
     fclose(*f);
-    *f = fopen("/Users/cernox/Desktop/db" , "rb+");
+    *f = fopen("database" , "rb+");
+    //*f = fopen("/Users/cernox/Desktop/database" , "rb+");
     
     printf("\nSpreed Sheet Imported Successfully\n\n");
     delay_seconds(1);

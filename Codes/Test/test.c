@@ -1,13 +1,16 @@
 // Next steps : 
 // 1 - set value & set formula function || cell info func (print value & type of vlaue ) : (Done)
 // 2 - build file.c (I think i have a idea) : (Done) 
-// 3 - formula.c (I Dont have any fucking idea) (Not strated) 
+// 3 - formula.c (Done)  (in this part i mostly used educational youtube resources & Google Gemini AI)
 
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 #include <errno.h>
 #include <time.h>
+#include <math.h>
+#include <ctype.h>
+
 
 struct  CELL_INFO{
     char name[3];
@@ -15,8 +18,8 @@ struct  CELL_INFO{
     int int_set;
     double float_num;
     int float_set;      
-    //char formula[100];
-    //int formula_set; 
+    char formula[100];
+    int formula_set; 
 
     /*
         status show what kind of data does the sell have stored
@@ -38,6 +41,25 @@ int new_sheet(struct CELL_INFO ** , int * , int * , FILE **);
 int load_binary(char * , struct CELL_INFO ** , int * , int * , FILE **);
 void save(FILE * , struct CELL_INFO * , int , int );
 void export_txt(struct CELL_INFO * , int , int);
+
+// ---------------------- < Formula Engine > ----------------------
+
+// Global variables needed for the parser parsing state
+const char *expression_ptr;
+struct CELL_INFO *sheet_cells;
+int sheet_rows;
+int sheet_cols;
+int parse_error; // 0: OK, 1: Error
+
+void recalculate_all(struct CELL_INFO *, int , int);
+double evaluate_formula(char *, struct CELL_INFO *, int , int , int *);
+double get_cell_value_by_name(char *);
+double parse_expression();
+double parse_term();
+double parse_factor();
+void skip_whitespace();
+
+//------------------------------------------------------------------
 void help();
 
 int main(){
@@ -76,7 +98,7 @@ int main(){
         int ch;
         while ((ch = getchar()) != '\n' && ch != EOF) {}
         if (!(load_binary(filename , &cells , &rows , &cols , &f))){
-            printf("File Not Found!\n");
+            printf("\nFile Not Found!\n\n");
             printf("Terminating Program....\n");
             delay_seconds(1);
             return 1;
@@ -165,7 +187,6 @@ int main(){
     delay_seconds(1);
     printf("Terminating the program....");
     delay_seconds(1);
-    printf("\nGood Bye\n");
     return 0;
 }
 
@@ -190,7 +211,7 @@ int new_sheet(struct CELL_INFO **cells , int *rows , int *cols , FILE **f){
 
     identify_cells(*cells , *rows , *cols);
 
-    *f = fopen("/Users/cernox/Desktop/db" , "wb");
+    *f = fopen("database" , "wb");
     fwrite(&rows , sizeof(int) , 1 , *f);
     fwrite(&cols , sizeof(int) , 1 , *f);
 
@@ -202,25 +223,25 @@ int new_sheet(struct CELL_INFO **cells , int *rows , int *cols , FILE **f){
             (*cells)[index].int_num = 0;
             (*cells)[index].int_set = 1;
             (*cells)[index].float_set = 0;
-            //(*cells)[index].formula_set = 0;
+            (*cells)[index].formula_set = 0;
             (*cells)[index].status[0] = 1;
             fwrite(&(*cells)[index] , sizeof(struct CELL_INFO) , 1 ,*f);
         }
     }
 
     fclose(*f);
-    *f = fopen("/Users/cernox/Desktop/db" , "rb+");
+    *f = fopen("database" , "rb+");
 
     delay_seconds(1);
-    printf("New spreed sheet created. Binary File Name : db\n\n");
+    printf("New spreed sheet created. Binary File Name : database\n\n");
     delay_seconds(1);
 
     return 1;
 }
 
 int load_binary(char *filename , struct CELL_INFO **cells , int *rows , int *cols , FILE **f){
-    //*f = fopen(filename , "rb");
-    *f = fopen("/Users/cernox/Desktop/db" , "rb");
+    *f = fopen(filename , "rb");
+    //*f = fopen("/Users/cernox/Desktop/db" , "rb");
 
     delay_seconds(1);
     printf("\nLoading spreadsheet...\n");
@@ -246,7 +267,9 @@ int load_binary(char *filename , struct CELL_INFO **cells , int *rows , int *col
         }
 
     fclose(*f);
-    *f = fopen("/Users/cernox/Desktop/db" , "rb+");
+
+    *f = fopen("database" , "rb+");
+    //*f = fopen("/Users/cernox/Desktop/db" , "rb+");
     
     printf("\nSpreed Sheet Imported Successfully\n\n");
     delay_seconds(1);
@@ -329,7 +352,7 @@ void check_operator(char opt[] , int * rows , int * cols , struct CELL_INFO **ce
         *is_save = 0;
     }
 
-    else if(strcmp(opt , "cell info") == 0 || strcmp(opt , "info") == 0){
+    else if(strcmp(opt , "cell info") == 0 || strcmp(opt , "cf") == 0){
         cell_info(*cells , *rows , *cols);
     }
 
@@ -343,6 +366,53 @@ void check_operator(char opt[] , int * rows , int * cols , struct CELL_INFO **ce
         else{
             printf("\n      Error! Something went wrong");
             *is_save = 0;
+        }
+    }
+
+    else if (strcmp(opt , "set formula") == 0 || strcmp(opt , "sf") == 0){
+
+        char str[3];
+        printf("\n      Enter Cells Name : "); scanf("%2s" , str);
+
+        int ch;
+        while ((ch = getchar()) != '\n' && ch != EOF) {}
+
+        int index;
+        int found = 0;
+        for (int r = 0 ; r < *rows ; r++)
+            for (int c = 0 ; c < *cols ; c++){
+                index = r * *cols + c;
+                if (strcmp((*cells)[index].name , str) == 0){
+                    found = 1;
+                    char input_formula[100];
+                    printf("      Enter Formula: ");
+                    fgets(input_formula, sizeof(input_formula), stdin);
+                    input_formula[strcspn(input_formula, "\n")] = '\0';
+                    strcpy((*cells)[index].formula, input_formula);
+                    (*cells)[index].formula_set = 1;
+
+                    errno = 0;
+                    double res = evaluate_formula(input_formula, *cells, *rows, *cols, &errno);
+                    
+                    if (errno == 0) {
+                        (*cells)[index].float_num = res;
+                        (*cells)[index].float_set = 1;
+                        (*cells)[index].int_set = 0;
+                        (*cells)[index].status[0] = 2; // Treat result as float
+                        printf("      Formula set! Result calculated: %lf\n", res);
+                    } 
+                    
+                    else {
+                        printf("      Formula Error! Value not updated.\n");
+                    }
+
+                    *is_save = 0;
+                    break;
+                }
+            }
+
+        if (found == 0){
+            printf("\n      Cell Not Found!");
         }
     }
 
@@ -472,7 +542,7 @@ void resize_sheet(struct CELL_INFO **cells , int *rows , int *cols){
                     tmp[index].int_num = 0;
                     tmp[index].int_set = 1;
                     tmp[index].float_set = 0;
-                    //tmp[index].formula_set = 0;
+                    tmp[index].formula_set = 0;
                     tmp[index].status[0] = 1;
                 }
             }
@@ -558,6 +628,8 @@ void set_value(struct CELL_INFO **cells , int rows , int cols){
         printf("\n      Cell Not Found!");
         return;
     }
+
+    recalculate_all(*cells , rows , cols);
 }
 
 void cell_info(struct CELL_INFO *cells , int rows , int cols){
@@ -604,8 +676,11 @@ void help(){
     printf("\n                  by using this command you can see current sheet pattern\n");
     printf("\n      command 3 - set value (or sv as short command)");
     printf("\n                  by using this command you can set numberic values to cells\n");
-    printf("\n      command 4 - cell info (or info as short command)");
+    printf("\n      command 4 - cell info (or cf as short command)");
     printf("\n                  by using this command you can see info like (value & datatypes) about cell \n");
+    printf("\n      command 5 - set formula (or sf as short command)");
+    printf("\n                  by using this command you can set formula for the cell you enter , then it will calculate the result\n");
+    printf("\n                  and result will be saved as the new value of cell\n");
 }
 
 void identify_cells(struct CELL_INFO *cells , int rows , int cols){
@@ -639,4 +714,200 @@ void display_cells(struct CELL_INFO *cells , int rows , int cols){
         }
         printf("\n");
     }
+}
+
+double evaluate_formula(char *formula_str, struct CELL_INFO *cells, int r, int c, int *error) {
+
+    expression_ptr = formula_str;
+    sheet_cells = cells;
+    sheet_rows = r;
+    sheet_cols = c;
+    parse_error = 0;
+    
+    // Check for empty formula
+    if (formula_str == NULL || strlen(formula_str) == 0) 
+        return 0.0;
+    
+    // Skip '=' if present (e.g. "=A1+B2")
+    if (*expression_ptr == '=') 
+        expression_ptr++;
+    
+    double result = parse_expression();
+    
+    if (parse_error) 
+        *error = 1;
+    else 
+        *error = 0;
+    
+    return result;
+}
+
+double get_cell_value_by_name(char *name) {
+    int index;
+    for (int r = 0; r < sheet_rows; r++) {
+        for (int c = 0; c < sheet_cols; c++) {
+            index = r * sheet_cols + c;
+            if (strcmp(sheet_cells[index].name, name) == 0) {
+                if (sheet_cells[index].float_set) 
+                    return sheet_cells[index].float_num;
+                if (sheet_cells[index].int_set) 
+                    return (double)sheet_cells[index].int_num;
+                return 0.0; // Empty cell counts as 0
+            }
+        }
+    }
+
+    return 0.0;
+}
+
+double parse_factor() {
+    skip_whitespace();
+    double temp = 0.0;
+
+    // Handle Numbers
+    if (isdigit(*expression_ptr) || *expression_ptr == '.') {
+        char *end_ptr;
+        temp = strtod(expression_ptr, &end_ptr);
+        expression_ptr = end_ptr;
+    }
+    // Handle Parentheses
+    else if (*expression_ptr == '(') {
+        expression_ptr++; // skip '('
+        temp = parse_expression();
+        skip_whitespace();
+        if (*expression_ptr == ')') {
+            expression_ptr++; // skip ')'
+        } 
+        else {
+            printf("Error: Missing ')'\n");
+            parse_error = 1;
+        }
+    }
+
+    else if (isalpha(*expression_ptr)) {
+        char token[20];
+        int i = 0;
+        // Read the word (e.g., "sin" or "A1")
+        while (isalnum(*expression_ptr)) {
+            if (i < 19) 
+                token[i++] = *expression_ptr;
+            expression_ptr++;
+        }
+        token[i] = '\0';
+
+        skip_whitespace();
+        
+        // Check if it is a function
+        if (*expression_ptr == '(') {
+            expression_ptr++; // skip '('
+            double arg = parse_expression();
+            skip_whitespace();
+            if (*expression_ptr == ')') 
+                expression_ptr++;
+
+            if (strcmp(token, "sin") == 0) 
+                temp = sin(arg);
+
+            else if (strcmp(token, "cos") == 0) 
+                temp = cos(arg);
+
+            else if (strcmp(token, "tan") == 0) 
+                temp = tan(arg);
+
+            else if (strcmp(token, "sqrt") == 0) 
+                temp = sqrt(arg);
+
+            else if (strcmp(token, "abs") == 0) 
+                temp = fabs(arg);
+
+            else if (strcmp(token, "log") == 0) 
+                temp = log10(arg);
+
+            else if (strcmp(token, "ln") == 0) 
+                temp = log(arg);
+            else {
+                printf("Error: Unknown function '%s'\n", token);
+                parse_error = 1;
+            }
+        }
+        // It must be a cell reference like "A1"
+        else {
+            temp = get_cell_value_by_name(token);
+        }
+    }
+
+    else if (*expression_ptr == '-') {
+        expression_ptr++;
+        return -parse_factor();
+    }
+    
+    return temp;
+}
+
+double parse_term() {
+    double left = parse_factor();
+    skip_whitespace();
+    
+    while (*expression_ptr == '*' || *expression_ptr == '/' || *expression_ptr == '^') {
+        char op = *expression_ptr;
+        expression_ptr++;
+        double right = parse_factor();
+        
+        if (op == '*') 
+            left *= right;
+        else if (op == '/'){
+            if (right == 0){ 
+                printf("Error: Division by zero\n"); 
+                parse_error = 1; 
+                return 0; 
+            }
+            left /= right;
+        }
+        else if (op == '^') 
+            left = pow(left, right);
+    }
+    return left;
+}
+
+double parse_expression() {
+    double left = parse_term();
+    skip_whitespace();
+    
+    while (*expression_ptr == '+' || *expression_ptr == '-') {
+        char op = *expression_ptr;
+        expression_ptr++;
+        double right = parse_term();
+        
+        if (op == '+') 
+            left += right;
+        else if (op == '-') 
+            left -= right;
+    }
+    return left;
+}
+
+void recalculate_all(struct CELL_INFO *cells, int rows, int cols) {
+    int index;
+    int err;
+    for (int k=0; k<3; k++) { // Repeat to resolve dependencies
+        for (int r = 0; r < rows; r++) {
+            for (int c = 0; c < cols; c++) {
+                index = r * cols + c;
+                if (cells[index].formula_set == 1) {
+                    double res = evaluate_formula(cells[index].formula, cells, rows, cols, &err);
+                    if (!err) {
+                        cells[index].float_num = res;
+                        cells[index].float_set = 1;
+                        cells[index].int_set = 0;
+                        cells[index].status[0] = 2;
+                    }
+                }
+            }
+        }
+    }
+}
+
+void skip_whitespace(){
+    while (*expression_ptr == ' ') 
+        expression_ptr++;
 }

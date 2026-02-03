@@ -17,21 +17,25 @@
 
 ## Abstract
 
-This project presents the design and implementation of a **lightweight spreadsheet simulation engine** written in the C programming language.  
+This project presents the design and implementation of a console‑based spreadsheet simulation engine written in the C programming language.
 
-The system supports **cell-based value storage** inspired by the core computational logic of spreadsheet software such as Microsoft Excel.
+The system emulates the core computational behavior of spreadsheet software (such as Microsoft Excel) by supporting:
 
-The project is designed as a foundation for future expansion toward expression parsing and formula computation.
+- Cell‑based numeric storage
+- Dynamic sheet resizing
+- Persistent binary storage
+- Mathematical formula evaluation with cell references
 
 ---
 
 ## 1. Project Overview
 
-The system simulates a table of cells similar to spreadsheet software, where each cell:
+The Spreadsheet Engine Simulation System (SESS) models a spreadsheet as a 2D grid of cells, where each cell:
 
-- Has a unique name (e.g., A1, B2)
-- Can store numeric values
-- Can be accessed and modified via textual commands
+- Has a unique identifier (e.g., A1, B3)
+- Stores either an integer or floating‑point value
+- May optionally contain a mathematical formula
+- Automatically updates its value when dependencies change
 
 All interactions with the system are performed through a **command-based interface**, making the program suitable for testing internal logic without a graphical layer.
 
@@ -39,15 +43,14 @@ All interactions with the system are performed through a **command-based interfa
 
 ## 2. Architecture and Modular Design
 
-The codebase is structured modularly to separate concerns:
+The codebase follows a clear separation of concerns, with each module responsible for a specific subsystem:
 
-├── common.h # Shared data structures and definitions
-
-├── sheet.c # Cell creation, access, and value assignment
-
-├── fileio.c # File-related operations (save/load)
-
-├── main.c # Command parsing and program control flow
+├── common.h     # Shared structures, constants, and includes
+├── main.c       # Program entry point and command interpreter
+├── sheet.c      # Sheet manipulation and cell operations
+├── fileio.c     # Binary persistence and export utilities
+├── formula.c    # Formula parsing and evaluation engine
+├── *.h          # Interface definitions for each module
 
 This modularization improves:
 - Readability
@@ -58,45 +61,74 @@ This modularization improves:
 
 ## 3. Data Structures
 
-Each cell is represented using a dedicated structure containing:
+Each spreadsheet cell is represented using the following structure:
 
-- Cell identifier
-- Value type
-- Stored numeric value
+- Cell name (A1, B2, …)
+- Integer value and status
+- Floating‑point value and status
+- Optional formula string
+- Type/status indicator (integer or float)
 
-This explicit modeling mirrors real spreadsheet engines at a conceptual level and avoids ambiguous data handling.
+This explicit modeling closely mirrors real spreadsheet engines and avoids ambiguous value handling.
 
 ---
 
 ## 4. Command-Based Interface (Core Feature)
 
-One of the key aspects of this project is the **command interpreter**, which allows users to interact with the spreadsheet using textual commands.
+The system uses a deterministic command interpreter that processes user input at runtime.
 
-Examples of supported operations include:
+Supported Commands
 
-- Creating or accessing cells
-- Setting numeric values
-- Displaying cell information
-- Managing the table structure
+1 - resize sheet (rs) : Resize the spreadsheet (rows/columns)
+2 - show cells (sc) : Display the sheet layout
+3 - set value (sv) : Assign a numeric value to a cell
+4 - set formula (sf) : Assign and evaluate a formula
+5 - cell info (cf) : Display detailed cell information
+6 - help (hp) : Display command list
+7 - save (s) : Persist current state to disk
+8 - exit : Terminate the program
 
-The command system is designed to be:
-- Deterministic
-- Easily extendable
-- Independent of internal data representation
-
-This design choice allows new commands (e.g., formulas, functions) to be added without refactoring existing logic.
-
----
-
-## 5. Current Capabilities
-
-✔ Cell creation and indexing  
-✔ Numeric value storage  
-✔ Structured command parsing  
-✔ Modular code organization  
+The command system is designed to be easily extensible, allowing new operations to be added without refactoring existing logic.
 
 ---
 
+## 5. File Persistence
+
+5.1 Binary Storage
+The spreadsheet state is stored in a binary file, including:
+
+- Sheet dimensions
+- Full cell data structures
+- Stored formulas and values
+
+This allows the spreadsheet to be restored exactly as it was at program startup.
+
+5.2 Text Export
+Upon program termination, a human‑readable report is automatically generated, summarizing:
+
+- Cell names
+- Data types
+- Final computed values
+- Timestamp of export
+---
+
+## 6. Current Capabilities
+
+✔ Dynamic sheet resizing
+
+✔ Integer and floating‑point cell values
+
+✔ Command‑driven interaction
+
+✔ Binary save/load
+
+✔ Formula parsing and evaluation
+
+✔ Automatic recalculation
+
+✔ Modular and extensible design
+
+---
 ## License
 
 This project is intended for educational use.

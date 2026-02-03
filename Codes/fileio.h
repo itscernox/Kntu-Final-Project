@@ -3,7 +3,6 @@
 
 #include "common.h"
 
-
 // Function for intialization part (Build new spreed sheet)
 int new_sheet(CELL_INFO ** , int * , int * , FILE **);
 

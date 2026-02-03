@@ -206,6 +206,10 @@ void set_value(CELL_INFO **cells , int rows , int cols){
         printf("\n      Cell Not Found!");
         return;
     }
+
+    // Recalculate the value of cells which has set with formula
+    recalculate_all(*cells , rows , cols);
+
 }
 
 void cell_info(CELL_INFO *cells , int rows , int cols){
@@ -253,8 +257,11 @@ void help(){
     printf("\n                  by using this command you can see current sheet pattern\n");
     printf("\n      command 3 - set value (or sv as short command)");
     printf("\n                  by using this command you can set numberic values to cells\n");
-    printf("\n      command 4 - cell info (or info as short command)");
+    printf("\n      command 4 - cell info (or cf as short command)");
     printf("\n                  by using this command you can see info like (value & datatypes) about cell \n");
+    printf("\n      command 5 - set formula (or sf as short command)");
+    printf("\n                  by using this command you can set formula for the cell you enter , then it will calculate the result\n");
+    printf("\n                  and result will be saved as the new value of cell\n");
 }
 
 void identify_cells(CELL_INFO *cells , int rows , int cols){
