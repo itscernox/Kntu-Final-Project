@@ -372,7 +372,7 @@ void check_operator(char opt[] , int * rows , int * cols , struct CELL_INFO **ce
     else if (strcmp(opt , "set formula") == 0 || strcmp(opt , "sf") == 0){
 
         char str[3];
-        printf("\n      Enter Cells Name : "); scanf("%2s" , str);
+        printf("\n      Enter the destination Cells Name : "); scanf("%2s" , str);
 
         int ch;
         while ((ch = getchar()) != '\n' && ch != EOF) {}
@@ -586,7 +586,7 @@ void set_value(struct CELL_INFO **cells , int rows , int cols){
                     if (x == 'n'){
                         (*cells)[index].int_num = 0;
                     }
-                    if (x != 'y' && x != 'y'){
+                    if (x != 'y' && x != 'n'){
                         printf("      invalid input!\n");
                         return;
                     }
@@ -681,6 +681,11 @@ void help(){
     printf("\n      command 5 - set formula (or sf as short command)");
     printf("\n                  by using this command you can set formula for the cell you enter , then it will calculate the result\n");
     printf("\n                  and result will be saved as the new value of cell\n");
+    printf("\n      command 6 - save");
+    printf("\n                  by using this command you can commit and save your changes into disk\n");
+    printf("\n      command 7 - exit");
+    printf("\n                  by using this command you can terminate the programm and quit\n");
+    
 }
 
 void identify_cells(struct CELL_INFO *cells , int rows , int cols){

@@ -46,10 +46,15 @@ All interactions with the system are performed through a **command-based interfa
 The codebase follows a clear separation of concerns, with each module responsible for a specific subsystem:
 
 ├── common.h     # Shared structures, constants, and includes
+
 ├── main.c       # Program entry point and command interpreter
+
 ├── sheet.c      # Sheet manipulation and cell operations
+
 ├── fileio.c     # Binary persistence and export utilities
+
 ├── formula.c    # Formula parsing and evaluation engine
+
 ├── *.h          # Interface definitions for each module
 
 This modularization improves:
@@ -80,12 +85,19 @@ The system uses a deterministic command interpreter that processes user input at
 Supported Commands
 
 1 - resize sheet (rs) : Resize the spreadsheet (rows/columns)
+
 2 - show cells (sc) : Display the sheet layout
+
 3 - set value (sv) : Assign a numeric value to a cell
+
 4 - set formula (sf) : Assign and evaluate a formula
+
 5 - cell info (cf) : Display detailed cell information
+
 6 - help (hp) : Display command list
+
 7 - save (s) : Persist current state to disk
+
 8 - exit : Terminate the program
 
 The command system is designed to be easily extensible, allowing new operations to be added without refactoring existing logic.
@@ -129,6 +141,34 @@ Upon program termination, a human‑readable report is automatically generated, 
 ✔ Modular and extensible design
 
 ---
+
+### Build & Run
+
+Prerequisites
+To compile and run this project, a C compiler compatible with the C11 standard is required. The project has been tested with GCC, which is available by default on most Linux systems and can be installed on macOS via Xcode Command Line Tools or on Windows via MinGW or similar toolchains.
+
+Compilation
+The project consists of multiple source files that must be compiled and linked together. Use the following command from the project’s root directory:
+
+- gcc -Wall -Wextra -std=c11 main.c sheet.c fileio.c formula.c -o sess
+
+This command performs the following:
+	•	Enables additional compiler warnings (-Wall -Wextra) to help detect potential issues.
+	•	Enforces the C11 language standard (-std=c11).
+	•	Compiles all source files and links them into a single executable named sess.
+
+Execution
+After a successful build, run the program using:
+
+- ./sess
+
+Portability Notes
+The project relies exclusively on standard C libraries (such as <stdio.h>, <stdlib.h>, <string.h>, <math.h>, etc.) and does not depend on any platform-specific APIs. Therefore, any user with a compliant C11 compiler should be able to compile and run the program without modification across different operating systems.
+
+PLEASE RUN THIS COMMANDS ON THE CODES DIRECTORY!
+
+---
+
 ## License
 
 This project is intended for educational use.

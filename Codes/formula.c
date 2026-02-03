@@ -20,7 +20,6 @@
  * IMPLEMENTATION NOTE & AI ASSISTANCE:
  * Due to the complexity of writing a parser from scratch, the core implementation logic for the Recursive Descent algorithm were
  * derived from educational YouTube resources d(e.g., Computerphile, CodeAesthetics) & assistance of [Google Gemini AI].
- * structure of this algorithm were derived from educational YouTube resources d(e.g., Computerphile, CodeAesthetics) and generated with the assistance of 
  *
  * !! BUT The logic is reviewed !! 
  * 
@@ -28,24 +27,6 @@
 */
 
 #include "common.h"
-
-double get_cell_value_by_name(char *name) {
-    int index;
-    for (int r = 0; r < sheet_rows; r++) {
-        for (int c = 0; c < sheet_cols; c++) {
-            index = r * sheet_cols + c;
-            if (strcmp(sheet_cells[index].name, name) == 0) {
-                if (sheet_cells[index].float_set) 
-                    return sheet_cells[index].float_num;
-                if (sheet_cells[index].int_set) 
-                    return (double)sheet_cells[index].int_num;
-                return 0.0; // Empty cell counts as 0
-            }
-        }
-    }
-
-    return 0.0;
-}
 
 double evaluate_formula(char *formula_str, CELL_INFO *cells, int r, int c, int *error) {
     
@@ -72,6 +53,47 @@ double evaluate_formula(char *formula_str, CELL_INFO *cells, int r, int c, int *
         *error = 0;
     
     return result;
+}
+
+double parse_expression(){
+    double left = parse_term();
+    skip_whitespace();
+    
+    while (*expression_ptr == '+' || *expression_ptr == '-') {
+        char op = *expression_ptr;
+        expression_ptr++;
+        double right = parse_term();
+        
+        if (op == '+') 
+            left += right;
+        else if (op == '-') 
+            left -= right;
+    }
+    return left;
+}
+
+double parse_term() {
+    double left = parse_factor();
+    skip_whitespace();
+    
+    while (*expression_ptr == '*' || *expression_ptr == '/' || *expression_ptr == '^') {
+        char op = *expression_ptr;
+        expression_ptr++;
+        double right = parse_factor();
+        
+        if (op == '*') left *= right;
+        else if (op == '/'){
+            if (right == 0){
+                 printf("Error: Division by zero\n"); 
+                 parse_error = 1; 
+                 return 0; 
+            }
+            left /= right;
+        }
+        else if (op == '^') 
+            left = pow(left, right);
+    }
+    return left;
 }
 
 double parse_factor() {
@@ -163,46 +185,24 @@ double parse_factor() {
     return temp;
 }
 
-double parse_term() {
-    double left = parse_factor();
-    skip_whitespace();
-    
-    while (*expression_ptr == '*' || *expression_ptr == '/' || *expression_ptr == '^') {
-        char op = *expression_ptr;
-        expression_ptr++;
-        double right = parse_factor();
-        
-        if (op == '*') left *= right;
-        else if (op == '/'){
-            if (right == 0){
-                 printf("Error: Division by zero\n"); 
-                 parse_error = 1; 
-                 return 0; 
+double get_cell_value_by_name(char *name) {
+    int index;
+    for (int r = 0; r < sheet_rows; r++) {
+        for (int c = 0; c < sheet_cols; c++) {
+            index = r * sheet_cols + c;
+            if (strcmp(sheet_cells[index].name, name) == 0) {
+                if (sheet_cells[index].float_set) 
+                    return sheet_cells[index].float_num;
+                if (sheet_cells[index].int_set) 
+                    return (double)sheet_cells[index].int_num;
+                return 0.0; // Empty cell counts as 0
             }
-            left /= right;
         }
-        else if (op == '^') 
-            left = pow(left, right);
     }
-    return left;
+
+    return 0.0;
 }
 
-double parse_expression(){
-    double left = parse_term();
-    skip_whitespace();
-    
-    while (*expression_ptr == '+' || *expression_ptr == '-') {
-        char op = *expression_ptr;
-        expression_ptr++;
-        double right = parse_term();
-        
-        if (op == '+') 
-            left += right;
-        else if (op == '-') 
-            left -= right;
-    }
-    return left;
-}
 
 void recalculate_all(CELL_INFO *cells, int rows, int cols) {
     int index;

@@ -31,7 +31,7 @@ int new_sheet(CELL_INFO **cells , int *rows , int *cols , FILE **f){
             (*cells)[index].int_num = 0;
             (*cells)[index].int_set = 1;
             (*cells)[index].float_set = 0;
-            //(*cells)[index].formula_set = 0;
+            (*cells)[index].formula_set = 0;
             (*cells)[index].status[0] = 1;
             fwrite(&(*cells)[index] , sizeof(CELL_INFO) , 1 ,*f);
         }

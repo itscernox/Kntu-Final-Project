@@ -181,7 +181,7 @@ void check_operator(char opt[] , int * rows , int * cols , CELL_INFO **cells , F
     else if (strcmp(opt , "set formula") == 0 || strcmp(opt , "sf") == 0){
 
         char str[3];
-        printf("\n      Enter Cells Name : "); scanf("%2s" , str);
+        printf("\n      Enter the destination Cells Name : "); scanf("%2s" , str);
 
         int ch;
         while ((ch = getchar()) != '\n' && ch != EOF) {}

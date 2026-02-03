@@ -1,0 +1,24 @@
+Prerequisites
+To compile and run this project, a C compiler compatible with the C11 standard is required. The project has been tested with GCC, which is available by default on most Linux systems and can be installed on macOS via Xcode Command Line Tools or on Windows via MinGW or similar toolchains.
+
+Compilation
+The project consists of multiple source files that must be compiled and linked together. Use the following command from the project’s root directory:
+
+gcc -Wall -Wextra -std=c11 main.c sheet.c fileio.c formula.c -o sess
+
+This command performs the following:
+	•	Enables additional compiler warnings (-Wall -Wextra) to help detect potential issues.
+	•	Enforces the C11 language standard (-std=c11).
+	•	Compiles all source files and links them into a single executable named sess.
+
+Execution
+After a successful build, run the program using:
+
+./sess
+
+Portability Notes
+The project relies exclusively on standard C libraries (such as <stdio.h>, <stdlib.h>, <string.h>, <math.h>, etc.) and does not depend on any platform-specific APIs. Therefore, any user with a compliant C11 compiler should be able to compile and run the program without modification across different operating systems.
+
+PLEASE RUN THIS COMMANDS ON THE CODES DIRECTORY!
+
+You can also run & debug the file (test.c); whole project is in there.

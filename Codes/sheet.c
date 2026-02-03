@@ -71,7 +71,7 @@ void resize_sheet(CELL_INFO **cells , int *rows , int *cols){
     int a = (r < *rows)? r : *rows;
     int b = (c < *cols)? c : *cols;
 
-     // Array List of what cells exists in new sheet from old one
+    // Array List of what cells exists in new sheet from old one
     int arr[a*b];
 
     int i = 0;
@@ -163,7 +163,7 @@ void set_value(CELL_INFO **cells , int rows , int cols){
                         (*cells)[index].int_num = 0;
                     }
 
-                    if (x != 'y' && x != 'y'){
+                    if (x != 'y' && x != 'n'){
                         printf("      invalid input!\n");
                         return;
                     }
@@ -262,6 +262,11 @@ void help(){
     printf("\n      command 5 - set formula (or sf as short command)");
     printf("\n                  by using this command you can set formula for the cell you enter , then it will calculate the result\n");
     printf("\n                  and result will be saved as the new value of cell\n");
+    printf("\n      command 6 - save");
+    printf("\n                  by using this command you can commit and save your changes into disk\n");
+    printf("\n      command 7 - exit");
+    printf("\n                  by using this command you can terminate the programm and quit\n");
+    
 }
 
 void identify_cells(CELL_INFO *cells , int rows , int cols){

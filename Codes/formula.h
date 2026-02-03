@@ -20,7 +20,6 @@
  * IMPLEMENTATION NOTE & AI ASSISTANCE:
  * Due to the complexity of writing a parser from scratch, the core implementation logic for the Recursive Descent algorithm were
  * derived from educational YouTube resources d(e.g., Computerphile, CodeAesthetics) & assistance of [Google Gemini AI].
- * structure of this algorithm were derived from educational YouTube resources d(e.g., Computerphile, CodeAesthetics) and generated with the assistance of 
  *
  * !! BUT The logic is reviewed !! 
  * 
