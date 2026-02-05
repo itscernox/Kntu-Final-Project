@@ -149,7 +149,7 @@ void set_value(CELL_INFO **cells , int rows , int cols){
                 input[strcspn(input , "\n")] = '\0';
                 char *endptr;
                 errno = 0;
-                (*cells)[index].int_num = strtol(input , &endptr , 10);
+                (*cells)[index].int_num = strtol(input , &endptr , 10); // strtol : str to long
                 if (errno == 0 && *endptr == '\0'){
                     printf("      Confirm to set (%lld) as value by entering [y/n] : " , (*cells)[index].int_num);
                     char x = 'y';
@@ -176,7 +176,7 @@ void set_value(CELL_INFO **cells , int rows , int cols){
                 }
                 
                 errno = 0;
-                (*cells)[index].float_num = strtof(input , &endptr);
+                (*cells)[index].float_num = strtod(input , &endptr); // strtod : sting to double
                 if (errno == 0 && *endptr == '\0'){
                     printf("          Confirm to set (%lf) as value by entering [y/n] : " , (*cells)[index].float_num);
                     char x = 'y';
@@ -250,16 +250,16 @@ void cell_info(CELL_INFO *cells , int rows , int cols){
 
 void help(){
     printf("\n      list of operators you can use : \n");
-    printf("\n      command 1 - resize sheet (or rs as short command)");
+    printf("\n      command 1 - resize sheet (or 'rs' as short command)");
     printf("\n                  by using this command you can increase or reduce num of rows and columns");
     printf("\n                  BECAREFUL : reducing rows or cols may delete your datas from sheet\n");
-    printf("\n      command 2 - show cells (or sc as short command)");
+    printf("\n      command 2 - show cells (or 'sc' as short command)");
     printf("\n                  by using this command you can see current sheet pattern\n");
-    printf("\n      command 3 - set value (or sv as short command)");
+    printf("\n      command 3 - set value (or 'sv' as short command)");
     printf("\n                  by using this command you can set numberic values to cells\n");
-    printf("\n      command 4 - cell info (or cf as short command)");
+    printf("\n      command 4 - cell info (or 'cf' as short command)");
     printf("\n                  by using this command you can see info like (value & datatypes) about cell \n");
-    printf("\n      command 5 - set formula (or sf as short command)");
+    printf("\n      command 5 - set formula (or 'sf' as short command)");
     printf("\n                  by using this command you can set formula for the cell you enter , then it will calculate the result\n");
     printf("\n                  and result will be saved as the new value of cell\n");
     printf("\n      command 6 - save");

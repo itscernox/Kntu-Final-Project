@@ -576,7 +576,7 @@ void set_value(struct CELL_INFO **cells , int rows , int cols){
                 input[strcspn(input , "\n")] = '\0';
                 char *endptr;
                 errno = 0;
-                (*cells)[index].int_num = strtol(input , &endptr , 10);
+                (*cells)[index].int_num = strtol(input , &endptr , 10); // strtol : str to long
                 if (errno == 0 && *endptr == '\0'){
                     printf("      Confirm to set (%lld) as value by entering [y/n] : " , (*cells)[index].int_num);
                     char x = 'y';
@@ -598,7 +598,7 @@ void set_value(struct CELL_INFO **cells , int rows , int cols){
                 }
                 
                 errno = 0;
-                (*cells)[index].float_num = strtof(input , &endptr);
+                (*cells)[index].float_num = strtod(input , &endptr); // strtod : str to double
                 if (errno == 0 && *endptr == '\0'){
                     printf("          Confirm to set (%lf) as value by entering [y/n] : " , (*cells)[index].float_num);
                     char x = 'y';
@@ -669,16 +669,16 @@ void cell_info(struct CELL_INFO *cells , int rows , int cols){
  
 void help(){
     printf("\n      list of operators you can use : \n");
-    printf("\n      command 1 - resize sheet (or rs as short command)");
+    printf("\n      command 1 - resize sheet (or 'rs' as short command)");
     printf("\n                  by using this command you can increase or reduce num of rows and columns");
     printf("\n                  BECAREFUL : reducing rows or cols may delete your datas from sheet\n");
-    printf("\n      command 2 - show cells (or sc as short command)");
+    printf("\n      command 2 - show cells (or 'sc' as short command)");
     printf("\n                  by using this command you can see current sheet pattern\n");
-    printf("\n      command 3 - set value (or sv as short command)");
+    printf("\n      command 3 - set value (or 'sv' as short command)");
     printf("\n                  by using this command you can set numberic values to cells\n");
-    printf("\n      command 4 - cell info (or cf as short command)");
+    printf("\n      command 4 - cell info (or 'cf' as short command)");
     printf("\n                  by using this command you can see info like (value & datatypes) about cell \n");
-    printf("\n      command 5 - set formula (or sf as short command)");
+    printf("\n      command 5 - set formula (or 'sf' as short command)");
     printf("\n                  by using this command you can set formula for the cell you enter , then it will calculate the result\n");
     printf("\n                  and result will be saved as the new value of cell\n");
     printf("\n      command 6 - save");
@@ -747,22 +747,46 @@ double evaluate_formula(char *formula_str, struct CELL_INFO *cells, int r, int c
     return result;
 }
 
-double get_cell_value_by_name(char *name) {
-    int index;
-    for (int r = 0; r < sheet_rows; r++) {
-        for (int c = 0; c < sheet_cols; c++) {
-            index = r * sheet_cols + c;
-            if (strcmp(sheet_cells[index].name, name) == 0) {
-                if (sheet_cells[index].float_set) 
-                    return sheet_cells[index].float_num;
-                if (sheet_cells[index].int_set) 
-                    return (double)sheet_cells[index].int_num;
-                return 0.0; // Empty cell counts as 0
-            }
-        }
+double parse_expression() {
+    double left = parse_term();
+    skip_whitespace();
+    
+    while (*expression_ptr == '+' || *expression_ptr == '-') {
+        char op = *expression_ptr;
+        expression_ptr++;
+        double right = parse_term();
+        
+        if (op == '+') 
+            left += right;
+        else if (op == '-') 
+            left -= right;
     }
+    return left;
+}
 
-    return 0.0;
+double parse_term() {
+    double left = parse_factor();
+    skip_whitespace();
+    
+    while (*expression_ptr == '*' || *expression_ptr == '/' || *expression_ptr == '^') {
+        char op = *expression_ptr;
+        expression_ptr++;
+        double right = parse_factor();
+        
+        if (op == '*') 
+            left *= right;
+        else if (op == '/'){
+            if (right == 0){ 
+                printf("Error: Division by zero\n"); 
+                parse_error = 1; 
+                return 0; 
+            }
+            left /= right;
+        }
+        else if (op == '^') 
+            left = pow(left, right);
+    }
+    return left;
 }
 
 double parse_factor() {
@@ -849,46 +873,22 @@ double parse_factor() {
     return temp;
 }
 
-double parse_term() {
-    double left = parse_factor();
-    skip_whitespace();
-    
-    while (*expression_ptr == '*' || *expression_ptr == '/' || *expression_ptr == '^') {
-        char op = *expression_ptr;
-        expression_ptr++;
-        double right = parse_factor();
-        
-        if (op == '*') 
-            left *= right;
-        else if (op == '/'){
-            if (right == 0){ 
-                printf("Error: Division by zero\n"); 
-                parse_error = 1; 
-                return 0; 
+double get_cell_value_by_name(char *name) {
+    int index;
+    for (int r = 0; r < sheet_rows; r++) {
+        for (int c = 0; c < sheet_cols; c++) {
+            index = r * sheet_cols + c;
+            if (strcmp(sheet_cells[index].name, name) == 0) {
+                if (sheet_cells[index].float_set) 
+                    return sheet_cells[index].float_num;
+                if (sheet_cells[index].int_set) 
+                    return (double)sheet_cells[index].int_num;
+                return 0.0; // Empty cell counts as 0
             }
-            left /= right;
         }
-        else if (op == '^') 
-            left = pow(left, right);
     }
-    return left;
-}
 
-double parse_expression() {
-    double left = parse_term();
-    skip_whitespace();
-    
-    while (*expression_ptr == '+' || *expression_ptr == '-') {
-        char op = *expression_ptr;
-        expression_ptr++;
-        double right = parse_term();
-        
-        if (op == '+') 
-            left += right;
-        else if (op == '-') 
-            left -= right;
-    }
-    return left;
+    return 0.0;
 }
 
 void recalculate_all(struct CELL_INFO *cells, int rows, int cols) {
