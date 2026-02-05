@@ -66,6 +66,7 @@ double parse_expression(){
         
         if (op == '+') 
             left += right;
+            
         else if (op == '-') 
             left -= right;
     }
@@ -81,7 +82,9 @@ double parse_term() {
         expression_ptr++;
         double right = parse_factor();
         
-        if (op == '*') left *= right;
+        if (op == '*') 
+            left *= right;
+
         else if (op == '/'){
             if (right == 0){
                  printf("Error: Division by zero\n"); 
@@ -90,6 +93,7 @@ double parse_term() {
             }
             left /= right;
         }
+
         else if (op == '^') 
             left = pow(left, right);
     }
@@ -103,7 +107,7 @@ double parse_factor() {
     // Handle Numbers
     if (isdigit(*expression_ptr) || *expression_ptr == '.') {
         char *end_ptr;
-        temp = strtod(expression_ptr, &end_ptr);
+        temp = strtod(expression_ptr, &end_ptr); // strtod : string to double
         expression_ptr = end_ptr;
     }
 
